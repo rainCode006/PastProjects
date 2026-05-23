@@ -1,0 +1,266 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "toc_visible": true,
+      "authorship_tag": "ABX9TyNqvMil0SoCSMJ9oaRLUm97",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/rainCode006/PastProjects/blob/main/Spam%20or%20Ham%20Detection%20Assignment\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Function that allows for training data to put words into a dictionary in python, counting each word's appearence per spam and ham"
+      ],
+      "metadata": {
+        "id": "M3c8YH6f9amo"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "dmiX0cpL9W7Z"
+      },
+      "outputs": [],
+      "source": [
+        "#function that takes the words in a string, establishes them if they're unique, and increments their count\n",
+        "def wordfill(data):\n",
+        "    i = dict() #establish a blank dictionary to hold the values\n",
+        "\n",
+        "    words = data.split() #split the provided string into words\n",
+        "\n",
+        "    for word in words: #for the length of the string\n",
+        "        if word in i: #if the word already was found, increment it\n",
+        "            i[word] = i[word] + 1\n",
+        "        else: #if the word is new, establish it and set it equal to 1\n",
+        "            i[word] = 1\n",
+        "    return i #return the dictionary of words and counts"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Small helper function to determine the total amount of words present in spam or ham"
+      ],
+      "metadata": {
+        "id": "Uapxqvtt9rKf"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#function that provides the total number of words in a spam/ham data set\n",
+        "def adddict(dictionary):\n",
+        "    truetotal = 0\n",
+        "    for val in dictionary:\n",
+        "        truetotal = truetotal + dictionary[val]\n",
+        "    return truetotal"
+      ],
+      "metadata": {
+        "id": "koyd7hWL9u2J"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Main implementation broken up below, first portion is the training data while the second half is the test data. I initially broke it up to make it more readible for colab but it would not run correctly when separated due to errors with closing the .csv file early"
+      ],
+      "metadata": {
+        "id": "xeLVB7n29xFt"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "spam = 0\n",
+        "ham = 0\n",
+        "spamtotal = dict() #final dictionary that will collect the values through the looped dictionaries of spam\n",
+        "hamtotal = dict() #final dictionary that will collect the values through the looped dictionaries of ham\n",
+        "with open(\"SpamDetection.csv\") as data: #read in spamdetection file and automatically close when done\n",
+        "    data.readline() #read in to skip first line of lables: test and data\n",
+        "    for x in range(20): #read in the training data\n",
+        "        train = data.readline()\n",
+        "        train = train.lower() #format all strings into lowercase\n",
+        "        train = train.split(\",\") #split the string into the spam/ham identifier, and the sentence itself\n",
+        "        if (train[0] == \"spam\"): #if the sentence is a spam\n",
+        "            spam += 1\n",
+        "            spamfill = wordfill(train[1]) #get every word in the spam sentence and increment it up\n",
+        "            for y in spamfill.keys(): #for the length of values in the spamfill dictionary\n",
+        "                if y in spamtotal: #if the current key exists in the total count\n",
+        "                    spamtotal[y] += 1\n",
+        "                else: #if the current key does not exist in the total count, establish it there and set it equal to 1\n",
+        "                    spamtotal[y] = 1\n",
+        "        else: #if the sentence is a ham\n",
+        "            ham += 1\n",
+        "            hamfill = wordfill(train[1]) #get every word in the ham sentence and increment it up\n",
+        "            for z in hamfill.keys(): #for the length of values in the spamfill dictionary\n",
+        "                 if z in hamtotal: #if the current key exists in the total count\n",
+        "                    hamtotal[z] += 1\n",
+        "                 else: #if the current key does not exist in the total count, establish it there and set it equal to 1\n",
+        "                    hamtotal[z] = 1\n",
+        "    itr = 0 #variable to iterate a simple number for display text\n",
+        "    for y in range(10): #read in the test data\n",
+        "        itr += 1\n",
+        "        test = data.readline() #read in the test message\n",
+        "        print(\"Message \", itr, \":\", test) #print the test message\n",
+        "        test = test.lower() #format all strings into lowercase\n",
+        "        hold_spam = [] #list to hold spam calculations\n",
+        "        hold_ham = [] #list to hold ham calculations\n",
+        "        test = test.split(\",\")\n",
+        "        words = test[1].split() #iterates through each word in the string\n",
+        "        for word in words: #compute probability message is spam or ham\n",
+        "            temp_var = (spamtotal.get(word, 0)+1)/(adddict(spamtotal)+len(spamtotal)) #peform math for lapace smoothing for spam\n",
+        "            hold_spam.append(temp_var) #add the equation into the spam list\n",
+        "            temp_var = (hamtotal.get(word, 0)+1)/(adddict(hamtotal)+len(hamtotal)) #perform math for laplace smoothing for ham\n",
+        "            hold_ham.append(temp_var) #add the equation into the ham list\n",
+        "        probspam = spam/20 #initilize value that will hold posterior probability for spam\n",
+        "        probham = ham/20 #initialize value that will hold posterior probability for ham\n",
+        "        for x in hold_spam: #perform the calculations for determining posterior probability of spam\n",
+        "            probspam = probspam * x\n",
+        "        for x in hold_ham: # perform the calclulations for determining posterior probability of ham\n",
+        "            probham = probham * x\n",
+        "        print(probspam)\n",
+        "        print(probham)\n",
+        "        if(probspam > probham): #if the spam is a higher value, the message is spam\n",
+        "            print(\"Posterior probability: \", probspam)\n",
+        "            print(\"This message is spam\\n\")\n",
+        "        else: #if the ham is a higher value, the message is ham\n",
+        "            print(\"Posterior probability: \", probham)\n",
+        "            print(\"This message is ham\\n\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ciOrCAnu919x",
+        "outputId": "19559384-9fcf-476e-f730-bfea81a7cc62"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Message  1 : ham,Tell where you reached\n",
+            "\n",
+            "4.923672140331222e-10\n",
+            "1.6048847991181125e-08\n",
+            "Posterior probability:  1.6048847991181125e-08\n",
+            "This message is ham\n",
+            "\n",
+            "Message  2 : ham,Your gonna have to pick up a burger for yourself on your way home\n",
+            "\n",
+            "4.6876471645019e-31\n",
+            "1.7460629376429241e-28\n",
+            "Posterior probability:  1.7460629376429241e-28\n",
+            "This message is ham\n",
+            "\n",
+            "Message  3 : spam,As a valued customer I am pleased to advise you that for your recent review you are awarded a Bonus Prize\n",
+            "\n",
+            "2.334540812983428e-45\n",
+            "2.475349234682247e-41\n",
+            "Posterior probability:  2.475349234682247e-41\n",
+            "This message is ham\n",
+            "\n",
+            "Message  4 : spam,Urgent you are awarded a complimentary trip to EuroDisinc To claim text immediately\n",
+            "\n",
+            "8.531517839393461e-28\n",
+            "5.652878760618966e-27\n",
+            "Posterior probability:  5.652878760618966e-27\n",
+            "This message is ham\n",
+            "\n",
+            "Message  5 : ham,Finished class where are you\n",
+            "\n",
+            "3.7874401079470944e-12\n",
+            "1.0843816210257519e-10\n",
+            "Posterior probability:  1.0843816210257519e-10\n",
+            "This message is ham\n",
+            "\n",
+            "Message  6 : ham,where are you how did you perform \n",
+            "\n",
+            "2.801361026588087e-16\n",
+            "4.1585124254092024e-13\n",
+            "Posterior probability:  4.1585124254092024e-13\n",
+            "This message is ham\n",
+            "\n",
+            "Message  7 : ham,you can call me now\n",
+            "\n",
+            "3.408696097152385e-11\n",
+            "4.3375264841030067e-10\n",
+            "Posterior probability:  4.3375264841030067e-10\n",
+            "This message is ham\n",
+            "\n",
+            "Message  8 : ham,I am waiting Call me once you are free\n",
+            "\n",
+            "1.989132089885033e-20\n",
+            "2.1697341257483052e-17\n",
+            "Posterior probability:  2.1697341257483052e-17\n",
+            "This message is ham\n",
+            "\n",
+            "Message  9 : ham,I am on the way to homei\n",
+            "\n",
+            "1.9609527186116613e-16\n",
+            "6.789408041484411e-14\n",
+            "Posterior probability:  6.789408041484411e-14\n",
+            "This message is ham\n",
+            "\n",
+            "Message  10 : spam,Please call our customer service representative between 10am-9pm as you have WON a guaranteed cash prize\n",
+            "1.604815808641817e-34\n",
+            "8.718756108687674e-34\n",
+            "Posterior probability:  8.718756108687674e-34\n",
+            "This message is ham\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Extra not used, but was used to test 1-3 on the assignment to do list"
+      ],
+      "metadata": {
+        "id": "5Q-AC0HL-Lmp"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#print(\"Computing Prior Probabilities P(Spam) and P(Ham): \")\n",
+        "#print(\"P(spam) = \", spam/20)\n",
+        "#print(\"P(Ham) = \", ham/20)\n",
+        "#print(\"Computing Conditional Probability P(Sentence/Spam): \")\n",
+        "#print(\"P(sentence/spam) = 1.0\")\n",
+        "#print(spamtotal)"
+      ],
+      "metadata": {
+        "id": "1-FwnQ9A-Qkk"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
