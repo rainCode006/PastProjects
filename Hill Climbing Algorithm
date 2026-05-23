@@ -1,0 +1,215 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyO39cF5AXclkj4mycHCY04P",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/rainCode006/PastProjects/blob/main/Hill%20Climbing%20Algorithm\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Below is both functions used for ease of use to implement the functions for problem 1 and 2."
+      ],
+      "metadata": {
+        "id": "LrYTbCecmEsZ"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "TJwlgtT3l5dI"
+      },
+      "outputs": [],
+      "source": [
+        "import random\n",
+        "\n",
+        "#simple function to perform the formula for hill climbing problem\n",
+        "def formula(x):\n",
+        "    solution = 2-x**2 #plugs the value into the formula\n",
+        "    return solution\n",
+        "\n",
+        "#simple function to perform formula for second problem\n",
+        "def formula2(x):\n",
+        "    solution = (0.0051*(x)**5) - (0.1367*(x)**4) + (1.24*(x)**3) - (4.456*(x)**2) + (5.66*(x)) - 0.287 #plugs the value into the formula\n",
+        "    return solution"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "This is the implementation of the general hill climbing algorithm, it was implemented under the assumption the algorithm would start from the left most limit of the range and search its neighbor to the right until the top value was found."
+      ],
+      "metadata": {
+        "id": "q3sQU0o3maJ2"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#performs the hill climbing algorithm to find the max\n",
+        "def hill_climbing(min_lim,max_lim,step_size): #gets the minimum, maximum, and step size for the formula\n",
+        "    current = min_lim\n",
+        "    neighbor = current + step_size #neighbor is first assigned to the left of the current value\n",
+        "    while formula(neighbor) > formula(current):#while the neighbor's value is higher than the current, move to the nieghbor's value\n",
+        "        current = neighbor #current gets neighbor's value\n",
+        "        neighbor = neighbor + step_size #nieghbor iterates again  to the left\n",
+        "        if(current == max_lim or neighbor > max_lim): #if the current reaches the minimum or the neighbor surpasses it stop\n",
+        "            return current\n",
+        "    return current #default return"
+      ],
+      "metadata": {
+        "id": "wd2cCpSXmQG7"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "This is the implementation of the random search hill climb algorithm"
+      ],
+      "metadata": {
+        "id": "o6yATIuUmp1a"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#performs the hill climbing algorithm to find the max using random points\n",
+        "#the function is largely the same as the previous but sets current to a random point in the range of the problem\n",
+        "#the function uses formula2 instead of formula\n",
+        "def rand_hill_climbing(min_lim,max_lim,step_size): #gets the minimum, maximum, and step size for the formula\n",
+        "    current = random.randrange(min_lim,max_lim) #start at a random point in the range of the problem\n",
+        "    neighbor = current - step_size #neighbor is first assigned to the left of the current value\n",
+        "    ###################################################If the iteration is positive###############################################\n",
+        "    if(formula2(neighbor) < formula2(current+step_size)): #if the solution value is higher to the right, change nieghbor value to the right\n",
+        "        neighbor = current + step_size\n",
+        "        while formula2(neighbor) > formula2(current):#while the neighbor's value is higher than the current, move to the nieghbor's value\n",
+        "            current = neighbor #current gets neighbor's value\n",
+        "            neighbor = neighbor + step_size #nieghbor iterates again to the right\n",
+        "            if(current == max_lim or neighbor > max_lim): #if the current reaches the max or the neighbor passes it stop\n",
+        "                return current\n",
+        "    ###################################################If the iteration is negative###############################################\n",
+        "    while formula2(neighbor) > formula2(current):#while the neighbor's value is higher than the current, move to the nieghbor's value\n",
+        "        current = neighbor #current gets neighbor's value\n",
+        "        neighbor = neighbor - step_size #nieghbor iterates again  to the left\n",
+        "        if(current == min_lim or neighbor < min_lim): #if the current reaches the minimum or the neighbor surpasses it stop\n",
+        "            return current\n",
+        "    return current #default return"
+      ],
+      "metadata": {
+        "id": "0xUXVC5bmuYv"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "This is a function to allow for ease of testing multiple runs of the random hill climbing algorithm"
+      ],
+      "metadata": {
+        "id": "JFa4YWVFmxc4"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#function to help for testing random hill climbing algorithm\n",
+        "def random_runs(runs):\n",
+        "    print(\"Running 20 random runs through hill climbing algorithm\")\n",
+        "    for x in range(runs):\n",
+        "        temp = rand_hill_climbing(0,10,0.5)\n",
+        "        print(\"Result for run \", x+1, \" is: \", temp)"
+      ],
+      "metadata": {
+        "id": "ljBvIYYam8cr"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "This is the main function that contains the function calls and test cases to be run"
+      ],
+      "metadata": {
+        "id": "LVJO1wipnDO0"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result=hill_climbing(-5,5,0.5)\n",
+        "print(\"The maximum value using 0.5 in the hill climbing algorithm is: \", result)\n",
+        "result2=hill_climbing(-5,5,0.1)\n",
+        "print(\"The maximum value using 0.1 in the hill climbing algorithm is: \", result2)\n",
+        "random_runs(20)\n",
+        "result3=hill_climbing(0,10,0.5)\n",
+        "print(\"The maximum value using the normal hill climbing algorithm is: \", result3)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "I8V75Th0nImh",
+        "outputId": "3e04ed11-4428-426d-ba84-888b69bd3dcd"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "The maximum value using 0.5 in the hill climbing algorithm is:  0.0\n",
+            "The maximum value using 0.1 in the hill climbing algorithm is:  -1.0269562977782698e-15\n",
+            "Running 20 random runs through hill climbing algorithm\n",
+            "Result for run  1  is:  6.5\n",
+            "Result for run  2  is:  6.5\n",
+            "Result for run  3  is:  1\n",
+            "Result for run  4  is:  6.5\n",
+            "Result for run  5  is:  6.5\n",
+            "Result for run  6  is:  6.5\n",
+            "Result for run  7  is:  1.0\n",
+            "Result for run  8  is:  1.0\n",
+            "Result for run  9  is:  6.5\n",
+            "Result for run  10  is:  1.0\n",
+            "Result for run  11  is:  6.5\n",
+            "Result for run  12  is:  6.5\n",
+            "Result for run  13  is:  6.5\n",
+            "Result for run  14  is:  6.5\n",
+            "Result for run  15  is:  6.5\n",
+            "Result for run  16  is:  1.0\n",
+            "Result for run  17  is:  1.0\n",
+            "Result for run  18  is:  6.5\n",
+            "Result for run  19  is:  1\n",
+            "Result for run  20  is:  6.5\n",
+            "The maximum value using the normal hill climbing algorithm is:  0\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
